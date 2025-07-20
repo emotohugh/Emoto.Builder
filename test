@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EMoto Builder — Early Access</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+    }
+    header {
+      padding: 1rem;
+      background: #111;
+      font-size: 1.4rem;
+      text-align: center;
+      border-bottom: 2px solid #333;
+    }
+    main {
+      display: flex;
+      gap: 2rem;
+      padding: 2rem;
+    }
+    section {
+      flex: 1;
+    }
+    .part-select {
+      margin-bottom: 1rem;
+    }
+    .stats {
+      background: #2c2c2c;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+    .stat-bar {
+      background: #444;
+      height: 10px;
+      margin-bottom: 0.5rem;
+      position: relative;
+      border-radius: 4px;
+    }
+    .stat-bar-fill {
+      background: limegreen;
+      height: 100%;
+      border-radius: 4px;
+    }
+    canvas {
+      background: #000;
+      border: 2px solid #333;
+      width: 100%;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <header>EMoto Builder — Early Access Test</header>
+  <main>
+    <section>
+      <h2>Choose Parts</h2>
+
+      <div class="part-select">
+        <label>Forks:</label><br/>
+        <select id="forkSelect">
+          <option value="fox40">Fox 40 Factory (Orange)</option>
+        </select>
+      </div>
+
+      <div class="part-select">
+        <label>Wheels:</label><br/>
+        <select id="wheelSelect">
+          <option value="warp9_black">Warp 9 (Black)</option>
+          <option value="warp9_gold">Warp 9 (Gold)</option>
+        </select>
+      </div>
+
+      <div class="part-select">
+        <label>Terrain:</label><br/>
+        <select id="terrainSelect">
+          <option value="road">Road</option>
+          <option value="offroad">Off-road</option>
+        </select>
+      </div>
+
+      <div class="stats">
+        <h3>Stats</h3>
+        <p>Speed</p>
+        <div class="stat-bar"><div id="speedBar" class="stat-bar-fill" style="width: 50%;"></div></div>
+        <p>Weight</p>
+        <div class="stat-bar"><div id="weightBar" class="stat-bar-fill" style="width: 60%; background: orange;"></div></div>
+        <p>Power</p>
+        <div class="stat-bar"><div id="powerBar" class="stat-bar-fill" style="width: 70%;"></div></div>
+        <p>Grip</p>
+        <div class="stat-bar"><div id="gripBar" class="stat-bar-fill" style="width: 65%; background: turquoise;"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3D Bike Preview</h2>
+      <canvas id="bikeCanvas">[3D View Here]</canvas>
+    </section>
+  </main>
+
+  <script>
+    const speedBar = document.getElementById("speedBar");
+    const weightBar = document.getElementById("weightBar");
+    const powerBar = document.getElementById("powerBar");
+    const gripBar = document.getElementById("gripBar");
+    const forkSelect = document.getElementById("forkSelect");
+    const wheelSelect = document.getElementById("wheelSelect");
+    const terrainSelect = document.getElementById("terrainSelect");
+
+    function updateStats() {
+      let fork = forkSelect.value;
+      let wheel = wheelSelect.value;
+      let terrain = terrainSelect.value;
+
+      // Example logic — later this will be dynamic and data-driven
+      let stats = {
+        speed: 50,
+        weight: 60,
+        power: 70,
+        grip: terrain === "road" ? 60 : 80,
+      };
+
+      if (wheel === "warp9_gold") {
+        stats.weight += 10;
+        stats.grip -= 5;
+      }
+
+      speedBar.style.width = stats.speed + "%";
+      weightBar.style.width = stats.weight + "%";
+      powerBar.style.width = stats.power + "%";
+      gripBar.style.width = stats.grip + "%";
+    }
+
+    forkSelect.addEventListener("change", updateStats);
+    wheelSelect.addEventListener("change", updateStats);
+    terrainSelect.addEventListener("change", updateStats);
+
+    updateStats();
+  </script>
+</body>
+</html>
