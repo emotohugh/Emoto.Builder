@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EMoto Builder — Early Access</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+    }
+    header {
+      padding: 1rem;
+      background: #111;
+      font-size: 1.4rem;
+      text-align: center;
+      border-bottom: 2px solid #333;
+    }
+    main {
+      display: flex;
+      gap: 2rem;
+      padding: 2rem;
+    }
+    section {
+      flex: 1;
+    }
+    .part-select {
+      margin-bottom: 1rem;
+    }
+    .stats {
+      background: #2c2c2c;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+    .stat-bar {
+      background: #444;
+      height: 10px;
+      margin-bottom: 0.5rem;
+      position: relative;
+      border-radius: 4px;
+    }
+    .stat-bar-fill {
+      background: limegreen;
+      height: 100%;
+      border-radius: 4px;
+    }
+    canvas {
+      border: 2px solid #333;
+      width: 100%;
+      height: 400px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>EMoto Builder — Early Access Test</header>
+  <main>
+    <section>
+      <h2>Choose Parts</h2>
+
+      <div class="part-select">
+        <label>Forks:</label><br/>
+        <select id="forkSelect">
+          <option value="fox40">Fox 40 Factory (Orange)</option>
+          <option value="rockshox">RockShox Boxxer</option>
+        </select>
+      </div>
+
+      <div class="part-select">
+        <label>Wheels:</label><br/>
+        <select id="wheelSelect">
+          <option value="warp9_black">Warp 9 (Black)</option>
+          <option value="warp9_gold">Warp 9 (Gold)</option>
+        </select>
+      </div>
+
+      <div class="part-select">
+        <label>Terrain:</label><br/>
+        <select id="terrainSelect">
+          <option value="road">Road</option>
+          <option value="offroad">Off-road</option>
+        </select>
+      </div>
+
+      <div class="stats">
+        <h3>Stats</h3>
+        <p>Speed</p>
+        <div class="stat-bar"><div id="speedBar" class="stat-bar-fill" style="width: 50%;"></div></div>
+        <p>Weight</p>
+        <div class="stat-bar"><div id="weightBar" class="stat-bar-fill" style="width: 60%; background: orange;"></div></div>
+        <p>Power</p>
+        <div class="stat-bar"><div id="powerBar" class="stat-bar-fill" style="width: 70%;"></div></div>
+        <p>Grip</p>
+        <div class="stat-bar"><div id="gripBar" class="stat-bar-fill" style="width: 65%; background: turquoise;"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3D Bike Preview</h2>
+      <canvas id="bikeCanvas"></canvas>
+    </section>
+  </main>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
+
+  <script>
+    // === Stats ===
+    const speedBar = document.getElementById("speedBar");
+    const weightBar = document.getElementById("weightBar");
+    const powerBar = document.getElementById("powerBar");
+    const gripBar = document.getElementById("gripBar");
+    const forkSelect = document.getElementById("forkSelect");
+    const wheelSelect = document.getElementById("wheelSelect");
+    const terrainSelect = document.getElementById("terrainSelect");
+
+    function updateStats() {
+      let fork = forkSelect.value;
+      let wheel = wheelSelect.value;
+      let terrain = terrainSelect.value;
+
+      let stats = { speed: 50, weight: 60, power: 70, grip: terrain === "road" ? 60 : 80 };
+
+      if (wheel === "warp9_gold") {
+        stats.weight += 10;
+        stats.grip -= 5;
+      }
+      if (fork === "rockshox") {
+        stats.weight -= 5;
+        stats.grip += 5;
+      }
+
+      speedBar.style.width = stats.speed + "%";
+      weightBar.style.width = stats.weight + "%";
+      powerBar.style.width = stats.power + "%";
+      gripBar.style.width = stats.grip + "%";
+    }
+
+    forkSelect.addEventListener("change", updateStats);
+    wheelSelect.addEventListener("change", updateStats);
+    terrainSelect.addEventListener("change", updateStats);
+
+    updateStats();
+
+    // === 3D Preview ===
+    const canvas = document.getElementById("bikeCanvas");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5).normalize();
+    scene.add(light);
+
+    // Frame (box)
+    const frameGeometry = new THREE.BoxGeometry(2, 0.3, 0.5);
+    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x5555ff });
+    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+    scene.add(frame);
+
+    // Wheels (cylinders)
+    const wheelGeometry = new THREE.TorusGeometry(0.6, 0.1, 16, 100);
+    const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const frontWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    const rearWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    frontWheel.position.set(1.5, -0.5, 0);
+    rearWheel.position.set(-1.5, -0.5, 0);
+    scene.add(frontWheel);
+    scene.add(rearWheel);
+
+    // Animation
+    function animate() {
+      requestAnimationFrame(animate);
+      frame.rotation.y += 0.01;
+      frontWheel.rotation.y += 0.02;
+      rearWheel.rotation.y += 0.02;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
